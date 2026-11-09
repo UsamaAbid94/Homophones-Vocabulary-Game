@@ -68,6 +68,10 @@ public static class ClaudeBridge
                 ColorfulUIRestyler.ApplySilently();
                 Log("applied");
                 break;
+            case "identity":
+                AppIdentity.Apply();
+                Log("identity applied");
+                break;
             case "shot":
                 Shot(parts[1], parts.Length > 2 ? parts[2].Split(',') : new string[0]);
                 break;

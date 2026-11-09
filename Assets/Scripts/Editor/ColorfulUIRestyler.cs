@@ -64,10 +64,81 @@ public static class ColorfulUIRestyler
         Sprite menuBg = MakeGradient("bg_menu.png", new Color32(0x5E, 0x35, 0xD6, 0xFF), new Color32(0xC8, 0x5A, 0xD8, 0xFF));
         Sprite gameBg = MakeGradient("bg_game.png", new Color32(0x4E, 0x34, 0xC9, 0xFF), new Color32(0x3A, 0x9C, 0xE8, 0xFF));
 
-        Restyle("Assets/Scenes/Menu.unity", canvas => RestyleMenu(canvas, menuBg));
-        Restyle("Assets/Scenes/Game.unity", canvas => RestyleGame(canvas, gameBg));
+        ImportAudio();
+
+        Restyle("Assets/Scenes/Menu.unity", canvas => { RestyleMenu(canvas, menuBg); AssignMenuAudio(); });
+        Restyle("Assets/Scenes/Game.unity", canvas => { RestyleGame(canvas, gameBg); AssignGameAudio(); });
 
         if (!string.IsNullOrEmpty(previousScene)) EditorSceneManager.OpenScene(previousScene);
+    }
+
+    // ------------------------------------------------------------------ audio
+
+    private const string AudioDir = "Assets/Audio/Generated/";
+
+    private static AudioClip Clip(string file)
+    {
+        var c = AssetDatabase.LoadAssetAtPath<AudioClip>(AudioDir + file);
+        if (c == null) Debug.LogWarning("[ColorfulUI] Missing audio: " + file);
+        return c;
+    }
+
+    /// <summary>Music streams as Vorbis; short effects are decompressed on load for zero-latency playback.</summary>
+    private static void ImportAudio()
+    {
+        if (!AssetDatabase.IsValidFolder("Assets/Audio/Generated")) return;
+        foreach (string guid in AssetDatabase.FindAssets("t:AudioClip", new[] { "Assets/Audio/Generated" }))
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            var importer = AssetImporter.GetAtPath(path) as AudioImporter;
+            if (importer == null) continue;
+            bool music = path.Contains("music");
+            var s = importer.defaultSampleSettings;
+            s.loadType = music ? AudioClipLoadType.Streaming : AudioClipLoadType.DecompressOnLoad;
+            s.compressionFormat = AudioCompressionFormat.Vorbis;
+            s.quality = music ? 0.6f : 0.75f;
+            importer.defaultSampleSettings = s;
+            importer.forceToMono = !music && !path.Contains("level_complete");
+            importer.loadInBackground = music;
+            importer.SaveAndReimport();
+        }
+    }
+
+    private static void AssignMenuAudio()
+    {
+        var sm = Object.FindAnyObjectByType<SoundManager>();
+        if (sm == null) return;
+        sm.buttonClickClip = Clip("ui_click.wav");
+        sm.musicClip = Clip("music_loop.wav");
+        sm.popupClip = Clip("ui_popup.wav");
+        sm.correctClip = Clip("answer_correct.wav");
+        sm.starClip = Clip("star_ding.wav");
+        if (sm.musicAudioSource != null)
+        {
+            sm.musicAudioSource.clip = sm.musicClip;
+            sm.musicAudioSource.loop = true;
+            sm.musicAudioSource.playOnAwake = true;
+            Dirty(sm.musicAudioSource);
+        }
+        if (sm.soundAudioSource != null)
+        {
+            sm.soundAudioSource.playOnAwake = false;
+            Dirty(sm.soundAudioSource);
+        }
+        Dirty(sm);
+    }
+
+    private static void AssignGameAudio()
+    {
+        var gm = Object.FindAnyObjectByType<GameManager>();
+        if (gm == null) return;
+        var so = new SerializedObject(gm);
+        so.FindProperty("failSound").objectReferenceValue = Clip("answer_wrong.wav");
+        so.FindProperty("winSound").objectReferenceValue = Clip("level_complete.wav");
+        so.FindProperty("scoreCounterSound").objectReferenceValue = Clip("score_count.wav");
+        so.FindProperty("startGameClip").objectReferenceValue = Clip("game_start.wav");
+        so.FindProperty("levelFailedSound").objectReferenceValue = Clip("level_failed.wav");
+        so.ApplyModifiedPropertiesWithoutUndo();
     }
 
     // ------------------------------------------------------------------ scenes
@@ -109,7 +180,7 @@ public static class ColorfulUIRestyler
         // Title + tagline
         Transform title = Find(c, "GameTitle");
         At(title, Top, new Vector2(0f, -330f), new Vector2(980f, 380f));
-        Txt(title, 132, Color.white, outline: true, outlineSize: 5f);
+        Txt(title, 150, Color.white, outline: true, outlineSize: 5f, text: AppIdentity.ProductName.ToUpperInvariant().Replace(" ", "\n"));
         if (title != null) title.GetComponent<Text>().lineSpacing = 0.85f;
         AddShadow(title);
         Entrance(title, UIEntrance.Mode.Pop, 0.1f, 0.6f);

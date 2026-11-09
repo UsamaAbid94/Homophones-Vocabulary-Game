@@ -61,6 +61,7 @@ public class AnswerButtonFX : MonoBehaviour
         Capture();
         if (correctSprite != null) image.sprite = correctSprite;
         image.color = Color.white;
+        SoundManager.Correct();
         if (buttonFx != null) buttonFx.Punch(0.35f);
     }
 

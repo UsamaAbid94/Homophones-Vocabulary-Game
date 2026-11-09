@@ -52,6 +52,7 @@ public class StarFX : MonoBehaviour
         {
             wasFull = true;
             transform.localEulerAngles = baseEuler;
+            SoundManager.Star();
             UIFx.Punch(transform, baseScale, 0.3f, 0.45f);
         }
     }

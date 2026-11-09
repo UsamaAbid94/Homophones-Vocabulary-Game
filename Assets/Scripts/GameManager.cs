@@ -24,6 +24,8 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private AudioClip failSound, winSound,scoreCounterSound,startGameClip;
     [SerializeField]
+    private AudioClip levelFailedSound;
+    [SerializeField]
     private Image timeSlider;
     [SerializeField]
     private Button tryAgainButton, restartButton;
@@ -223,6 +225,11 @@ public class GameManager : MonoBehaviour
         
         wrongAnswerIndicator.SetActive(false);
         levelManager.SetInputLocked(true);
+        if (levelFailedSound != null)
+        {
+            audioSource.clip = levelFailedSound;
+            audioSource.Play();
+        }
         levelFailedPanel.SetActive(true);
         isGameFail = true;
     }

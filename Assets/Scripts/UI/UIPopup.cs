@@ -35,6 +35,7 @@ public class UIPopup : MonoBehaviour
     private void OnEnable()
     {
         Capture();
+        SoundManager.Popup();
 
         LeanTween.cancel(gameObject);
         group.alpha = 0f;
