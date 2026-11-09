@@ -222,6 +222,7 @@ public class GameManager : MonoBehaviour
     {
         
         wrongAnswerIndicator.SetActive(false);
+        levelManager.SetInputLocked(true);
         levelFailedPanel.SetActive(true);
         isGameFail = true;
     }
@@ -290,6 +291,7 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 1f;
         levelFailedPanel.SetActive(false);
         levelManager.WrongAnswerCount = 0;
+        levelManager.SetInputLocked(false);
         for (int i = 0; i < crossImages.Length; i++)
         {
             crossImages[i].SetActive(false);
