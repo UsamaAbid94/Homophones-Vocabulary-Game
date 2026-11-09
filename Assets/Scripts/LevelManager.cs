@@ -201,7 +201,7 @@ public class LevelManager : MonoBehaviour
     public void WatchVideoForHints()
     {
         SoundManager.soundManager.ButtonClickSound();
-        AdsManager.instance.ShowRewardedAd();
+        //AdsManager.instance.ShowRewardedAd();
         GetMoreHints();
     }
     public void ResetHint()

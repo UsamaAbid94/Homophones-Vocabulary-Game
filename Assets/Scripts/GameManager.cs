@@ -257,7 +257,7 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 1f;
         SceneManager.LoadScene("Menu");
         SoundManager.soundManager.ButtonClickSound();
-        AdsManager.instance.ShowInterstitialAd();
+        //AdsManager.instance.ShowInterstitialAd();
     
     }
 
@@ -275,14 +275,14 @@ public class GameManager : MonoBehaviour
         }
         SceneManager.LoadScene("Game");
         SoundManager.soundManager.ButtonClickSound();
-        AdsManager.instance.ShowInterstitialAd();
+       // AdsManager.instance.ShowInterstitialAd();
       
     }
 
     public void TryAgainWithVideo()
     {
 
-        AdsManager.instance.ShowRewardedAd();
+     //  AdsManager.instance.ShowRewardedAd();
         TryAgain();
     }
     public void TryAgain()
